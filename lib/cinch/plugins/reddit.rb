@@ -30,6 +30,18 @@ module Cinch
         open(url, "User-Agent" => "reddit-irc-bot").read
       end
 
+      # Pluralizes a string
+      # Simple and stupid, but it works
+      def pluralize(n, singular, plural=nil)
+        if n == 1
+          "1 #{singular}"
+        elsif plural
+          "%s %s" % [commify(n), plural]
+        else
+          "%s %ss" % [commify(n), singular]
+        end
+      end
+
       # Plugin code
 
       # Karma Lookup
@@ -54,7 +66,7 @@ module Cinch
         else
           subMods = []
           data.each { |mod| subMods << mod["name"] }
-          m.reply("%s has moderators: %s" % [Format(:bold, subreddit), subMods.join(", ")])
+          m.reply("%s has %s: %s" % [Format(:bold, subreddit), pluralize( subMods.length, "moderator"), subMods[0..-2].join(", ") + ", and " + subMods[-1] ])
         end
       end
 
@@ -66,7 +78,7 @@ module Cinch
         unless data
           m.reply("%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
         else
-          m.reply("%s has %s readers" % [Format(:bold, subreddit), commify(data)])
+          m.reply("%s has %s" % [Format(:bold, subreddit), pluralize(data, "reader")])
         end
       end
     end
