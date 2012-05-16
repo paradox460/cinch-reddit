@@ -6,11 +6,15 @@ require 'cinch'
 require 'json'
 require 'open-uri'
 require 'cgi'
+require 'uri'
+require 'action_view'
+require 'date'
 
 module Cinch
   module Plugins
     class Reddit
       include Cinch::Plugin
+      include ActionView::Helpers::DateHelper
 
       RedditBaseUrl = "http://www.reddit.com"
       # Utilities
@@ -49,10 +53,10 @@ module Cinch
       def karma(m, user)
         url = "%s/user/%s/about.json" % [RedditBaseUrl, user]
         data = JSON.parse(urlload url)["data"] rescue nil
-        unless data
-          m.reply("%s doesn't appear to exist and therefore can't have karma" % user)
-        else
+        if data
           m.reply("%s has a link karma of %s and comment karma of %s" % [ Format(:bold, data["name"]), commify(data["link_karma"]), commify(data["comment_karma"]) ])
+        else
+          m.reply("%s doesn't appear to exist and therefore can't have karma" % user)
         end
       end
 
@@ -61,12 +65,12 @@ module Cinch
       def mods(m, subreddit)
         url = "%s/r/%s/about/moderators.json" % [RedditBaseUrl, subreddit]
         data = JSON.parse(urlload url)["data"]["children"] rescue nil
-        unless data
-          m.reply("%s doesn't appear to exist and therefore can't have moderators" % subreddit)
-        else
+        if data
           subMods = []
           data.each { |mod| subMods << mod["name"] }
           m.reply("%s has %s: %s" % [Format(:bold, subreddit), pluralize( subMods.length, "moderator"), subMods[0..-2].join(", ") + ", and " + subMods[-1] ])
+        else
+          m.reply("%s doesn't appear to exist and therefore can't have moderators" % subreddit)
         end
       end
 
@@ -75,10 +79,50 @@ module Cinch
       def readers(m, subreddit)
         url = "%s/r/%s/about.json" % [RedditBaseUrl, subreddit]
         data = JSON.parse(urlload url)["data"]["subscribers"] rescue nil
-        unless data
-          m.reply("%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
-        else
+        if data
           m.reply("%s has %s" % [Format(:bold, subreddit), pluralize(data, "reader")])
+        else
+          m.reply("%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
+        end
+      end
+
+      match /lookup (\S+)/, method: :lookup
+      def lookup(m, query)
+        url = "%s/api/info.json?url=%s" % [RedditBaseUrl, query]
+        data = JSON.parse(urlload url)["data"]["children"][0]["data"] rescue nil
+        if data
+          m.reply("%s - \"%.100s\" %s(%s|%s) by %s, %s ago, to /r/%s" % [
+            "http://redd.it/#{data['id']}",
+            Format(:bold, data['title']),
+            Format(:grey, commify(data['score'])),
+            Format(:orange, "+" + commify(data['ups'])),
+            Format(:blue, "-" + commify(data['downs'])),
+            data['author'],
+            time_ago_in_words(DateTime.strptime(data['created'].to_s,'%s')),
+            data['subreddit']
+            ])
+        else
+          m.reply("I couldn't find that for some reason. It might be my fault, or it might be reddit's")
+        end
+      end
+
+      match /link (\S+)/, method: :linkLookup
+      def linkLookup(m, query)
+        thing_id = URI.parse(query).path.split('/')[4]
+        url = "%s/api/info.json?id=t3_%s" % [RedditBaseUrl, thing_id]
+        data = JSON.parse(urlload url)["data"]["children"][0]["data"] rescue nil
+        if data
+          m.reply("\"%s\" %s(%s|%s) by %s, %s ago, to /r/%s" % [
+            Format(:bold, data['title']),
+            Format(:grey, commify(data['score'])),
+            Format(:orange, "+" + commify(data['ups'])),
+            Format(:blue, "-" + commify(data['downs'])),
+            data['author'],
+            time_ago_in_words(DateTime.strptime(data['created'].to_s, '%s')),
+            data['subreddit']
+            ])
+        else
+          m.reply("I couldn't find that for some reason. It might be my fault, or it might be reddit's")
         end
       end
     end
