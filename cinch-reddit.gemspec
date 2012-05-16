@@ -10,13 +10,13 @@ Gem::Specification.new do |gem|
   gem.summary       = %q{A reddit plugin for the cinch irc bot framework}
   gem.homepage      = "http://github.com/paradox460/cinch-reddit"
 
-  gem.add_dependency "cinch"
-  gem.add_dependency "json"
+  # Clean way to handle add_dependency
+  %w{cinch json actionpack}.each { |x| gem.add_dependency x }
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "cinch-reddit"
   gem.require_paths = ["lib"]
-  gem.version       = "1.0.2"
+  gem.version       = "1.1.0"
 end
