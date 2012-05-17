@@ -74,9 +74,9 @@ module Cinch
         if data
           subMods = []
           data.each { |mod| subMods << mod["name"] }
-          m.reply("%s has %s: %s" % [Format(:bold, subreddit), pluralize( subMods.length, "moderator"), pluralJoin(subMods) ])
+          m.reply("/r/%s has %s: %s" % [Format(:bold, subreddit), pluralize( subMods.length, "moderator"), pluralJoin(subMods) ])
         else
-          m.reply("%s doesn't appear to exist and therefore can't have moderators" % subreddit)
+          m.reply("/r/%s doesn't appear to exist and therefore can't have moderators" % subreddit)
         end
       end
 
@@ -86,9 +86,9 @@ module Cinch
         url = "%s/r/%s/about.json" % [RedditBaseUrl, subreddit]
         data = JSON.parse(urlload url)["data"]["subscribers"] rescue nil
         if data
-          m.reply("%s has %s" % [Format(:bold, subreddit), pluralize(data, "reader")])
+          m.reply("/r/%s has %s" % [Format(:bold, subreddit), pluralize(data, "reader")])
         else
-          m.reply("%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
+          m.reply("/r/%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
         end
       end
 
