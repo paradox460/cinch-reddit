@@ -14,9 +14,9 @@ Gem::Specification.new do |gem|
   %w{cinch json actionpack}.each { |x| gem.add_dependency x }
 
   gem.files         = `git ls-files`.split($\)
-  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  # gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  # gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "cinch-reddit"
   gem.require_paths = ["lib"]
-  gem.version       = "1.1.1"
+  gem.version       = "1.1.2"
 end
