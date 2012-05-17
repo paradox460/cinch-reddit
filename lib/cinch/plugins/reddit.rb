@@ -46,6 +46,12 @@ module Cinch
         end
       end
 
+      # Utility to join an array into a gramarically correct sentence.
+      def pluralJoin(array)
+        return array[0] unless array.length > 1
+        array[0..-2].join(", ") + ", and " + array[-1]
+      end
+
       # Plugin code
 
       # Karma Lookup
@@ -68,9 +74,9 @@ module Cinch
         if data
           subMods = []
           data.each { |mod| subMods << mod["name"] }
-          m.reply("%s has %s: %s" % [Format(:bold, subreddit), pluralize( subMods.length, "moderator"), subMods[0..-2].join(", ") + ", and " + subMods[-1] ])
+          m.reply("/r/%s has %s: %s" % [Format(:bold, subreddit), pluralize( subMods.length, "moderator"), pluralJoin(subMods) ])
         else
-          m.reply("%s doesn't appear to exist and therefore can't have moderators" % subreddit)
+          m.reply("/r/%s doesn't appear to exist and therefore can't have moderators" % subreddit)
         end
       end
 
@@ -80,9 +86,9 @@ module Cinch
         url = "%s/r/%s/about.json" % [RedditBaseUrl, subreddit]
         data = JSON.parse(urlload url)["data"]["subscribers"] rescue nil
         if data
-          m.reply("%s has %s" % [Format(:bold, subreddit), pluralize(data, "reader")])
+          m.reply("/r/%s has %s" % [Format(:bold, subreddit), pluralize(data, "reader")])
         else
-          m.reply("%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
+          m.reply("/r/%s doesn't appear to exist and therefore can't have subscribers" % subreddit)
         end
       end
 
