@@ -108,6 +108,7 @@ module Cinch
 
       match /link (\S+)/, method: :linkLookup
       def linkLookup(m, query)
+        return nil unless URI.parse(query).host.end_with?('reddit.com')
         thing_id = URI.parse(query).path.split('/')[4]
         url = "%s/api/info.json?id=t3_%s" % [RedditBaseUrl, thing_id]
         data = JSON.parse(urlload url)["data"]["children"][0]["data"] rescue nil
